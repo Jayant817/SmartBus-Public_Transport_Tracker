@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBus - Real-time Bus Tracking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav a:hover, .nav a.active {
+            background: #f1f5f9;
+            color: #3b82f6;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .map-container {
+            height: 300px;
+            background: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bus-icon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .bus-icon:nth-child(1) { top: 60px; left: 80px; }
+        .bus-icon:nth-child(2) { top: 180px; right: 100px; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .route-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .route-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .route-name {
+            font-weight: 600;
+        }
+
+        .arrival-time {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .stop-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .stop-item:last-child {
+            border-bottom: none;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: block;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            border-radius: 4px;
+            animation: progress 3s ease-out;
+        }
+
+        @keyframes progress {
+            from { width: 0; }
+            to { width: var(--progress, 100%); }
+        }
+
+        .impact-section {
+            max-width: 1200px;
+            margin: 4rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .impact-card {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .impact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .fullscreen-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #64748b;
+            padding: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .nav {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .impact-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        .admin-dropdown-menu {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    min-width: 180px;
+    animation: slideDown 0.2s ease-out;
+}
+
+.admin-menu-item {
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-menu-item:hover {
+    background: #f8fafc;
+}
+
+.admin-menu-item:active {
+    background: #e2e8f0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🚌</div>
+            <span>SmartBus</span>
+        </div>
+        <nav class="nav">
+            <a href="#" class="active">Track Bus</a>
+            <a href="#about">About</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Real-time Bus Tracking<br>for Small Cities</h1>
+        <p>A platform providing real-time locations and estimated arrival times of buses</p>
+        <button class="cta-button" onclick="scrollToTracking()">Track Your Bus</button>
+    </section>
+
+    <main class="main-content" id="tracking">
+        <div class="card">
+            <h3>
+                🗺️ Live Bus Tracking
+                <button class="fullscreen-btn" onclick="expandMap()">⛶</button>
+            </h3>
+            <div class="map-container" id="mapContainer">
+                <div class="bus-icon">🚌</div>
+                <div class="bus-icon">🚌</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>⏱️ Estimated Arrival Times</h3>
+            <div class="route-list">
+                <div class="route-item">
+                    <span class="route-name">Route 1</span>
+                    <span class="arrival-time">5 min</span>
+                </div>
+                <div class="route-item">
+                    <span class="route-name">Route 2</span>
+                    <span class="arrival-time">12 min</span>
+                </div>
+                <div class="route-item">
+                    <span class="route-name">Route 3</span>
+                    <span class="arrival-time">20 min</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🚏 Route 1 - Stops</h3>
+            <div class="stop-list">
+                <div class="stop-item">
+                    <span>Stop A</span>
+                    <span class="arrival-time">4 min</span>
+                </div>
+                <div class="stop-item">
+                    <span>Stop B</span>
+                    <span class="arrival-time">7 min</span>
+                </div>
+                <div class="stop-item">
+                    <span>Stop C</span>
+                    <span class="arrival-time">11 min</span>
+                </div>
+                <div class="stop-item">
+                    <span>Stop D</span>
+                    <span class="arrival-time">15 min</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📊 Admin Dashboard</h3>
+            <div class="stat-card">
+                <span class="stat-value">24</span>
+                <div class="stat-label">Total active buses</div>
+            </div>
+            <br>
+            <div class="stat-card">
+                <span class="stat-value">87%</span>
+                <div class="stat-label">On-time performance</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="--progress: 87%; width: 87%;"></div>
+                </div>
+            </div>
+            <br>
+            <div class="stat-card">
+                <div class="stat-label">Overcrowding Status</div>
+                <div class="progress-bar" style="margin-top: 0.5rem;">
+                    <div class="progress-fill" style="--progress: 65%; width: 65%; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="impact-section" id="about">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">About & Impact</h2>
+            <div class="impact-grid">
+                <div class="impact-card">
+                    <div class="impact-icon">📊</div>
+                    <h3>60% of commuters</h3>
+                    <p>face delays in Tier-2 cities</p>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">⏰</div>
+                    <h3>30% reduction</h3>
+                    <p>in waiting time with our solution</p>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">🌱</div>
+                    <h3>Benefits</h3>
+                    <p>Less traffic, less pollution, better public transport usage</p>
+                </div>
+            </div>
+        </div>
+        <nav class="nav">
+    <a href="#" class="active">Track Bus</a>
+    <a href="#about">About</a>
+    <a href="admin-login.html" id="adminNavLink">Admin Login</a>
+</nav>
+    </section>
+
+    <script>
+        // Add some CSS for notification animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        function scrollToTracking() {
+            document.getElementById('tracking').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function expandMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            if (mapContainer.style.height === '500px') {
+                mapContainer.style.height = '300px';
+            } else {
+                mapContainer.style.height = '500px';
+            }
+        }
+
+        // Simulate real-time updates
+        function updateArrivals() {
+            const arrivals = document.querySelectorAll('.arrival-time');
+            arrivals.forEach(arrival => {
+                if (arrival.textContent.includes('min')) {
+                    let time = parseInt(arrival.textContent);
+                    if (time > 1) {
+                        time -= Math.random() < 0.3 ? 1 : 0;
+                        arrival.textContent = time + ' min';
+                    }
+                }
+            });
+        }
+
+        // Update every 30 seconds
+        setInterval(updateArrivals, 30000);
+
+        // Add some interactivity to route items
+        document.querySelectorAll('.route-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.style.background = '#e0f2fe';
+                setTimeout(() => {
+                    this.style.background = '#f8fafc';
+                }, 500);
+            });
+        });
+
+        // Smooth animations on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card, .impact-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease-out';
+            observer.observe(card);
+        });
+        class AdminAuth {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.checkAuthStatus();
+        this.updateAdminNav();
+    }
+
+    // Check if admin is logged in (from localStorage or sessionStorage)
+    checkAuthStatus() {
+        const adminToken = localStorage.getItem('smartbus_admin_token');
+        const adminData = localStorage.getItem('smartbus_admin_data');
+        
+        if (adminToken && adminData) {
+            this.setAdminLoggedIn(JSON.parse(adminData));
+        }
+    }
+
+    // Update navigation based on login status
+    updateAdminNav() {
+        const adminLink = document.getElementById('adminNavLink');
+        const adminBadge = document.getElementById('adminBadge');
+        
+        if (this.isAdminLoggedIn()) {
+            const adminData = JSON.parse(localStorage.getItem('smartbus_admin_data'));
+            adminLink.textContent = `Admin (${adminData.name})`;
+            adminLink.href = '#';
+            adminLink.onclick = (e) => {
+                e.preventDefault();
+                this.showAdminMenu();
+            };
+            
+            if (adminBadge) {
+                adminBadge.style.display = 'inline-block';
+                adminBadge.textContent = `Welcome, ${adminData.name}`;
+            }
+        } else {
+            adminLink.textContent = 'Admin Login';
+            adminLink.href = 'admin-login.html';
+            if (adminBadge) {
+                adminBadge.style.display = 'none';
+            }
+        }
+    }
+
+    // Check if admin is currently logged in
+    isAdminLoggedIn() {
+        return localStorage.getItem('smartbus_admin_token') !== null;
+    }
+
+    // Set admin as logged in
+    setAdminLoggedIn(adminData) {
+        localStorage.setItem('smartbus_admin_token', adminData.token || 'demo-token');
+        localStorage.setItem('smartbus_admin_data', JSON.stringify(adminData));
+        this.updateAdminNav();
+        this.showNotification(`Welcome back, ${adminData.name}!`, 'success');
+    }
+
+    // Show admin dropdown menu
+    showAdminMenu() {
+        const menu = document.createElement('div');
+        menu.className = 'admin-dropdown-menu';
+        menu.innerHTML = `
+            <div class="admin-menu-item" onclick="adminAuth.goToDashboard()">
+                📊 Dashboard
+            </div>
+            <div class="admin-menu-item" onclick="adminAuth.goToSettings()">
+                ⚙️ Settings
+            </div>
+            <div class="admin-menu-item" onclick="adminAuth.logout()">
+                🚪 Logout
+            </div>
+        `;
+
+        // Position menu
+        const adminLink = document.getElementById('adminNavLink');
+        const rect = adminLink.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = (rect.bottom + 10) + 'px';
+        menu.style.right = '2rem';
+        menu.style.zIndex = '9999';
+
+        document.body.appendChild(menu);
+
+        // Close menu when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 100);
+    }
+
+    // Navigate to dashboard
+    goToDashboard() {
+        window.location.href = 'admin-dashboard.html'; // Create this page or redirect to admin section
+    }
+
+    // Navigate to settings
+    goToSettings() {
+        this.showNotification('🔧 Admin settings would open here', 'info');
+    }
+
+    // Logout admin
+    logout() {
+        localStorage.removeItem('smartbus_admin_token');
+        localStorage.removeItem('smartbus_admin_data');
+        this.updateAdminNav();
+        this.showNotification('👋 Logged out successfully', 'info');
+    }
+
+    // Show notification
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideInRight 0.3s ease-out;
+            max-width: 300px;
+            word-wrap: break-word;
+        `;
+        
+        if (type === 'success') {
+            notification.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        } else if (type === 'error') {
+            notification.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+        } else {
+            notification.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+        }
+        
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Initialize admin auth system
+const adminAuth = new AdminAuth();
+
+// Listen for admin login from other pages
+window.addEventListener('storage', function(e) {
+    if (e.key === 'smartbus_admin_token') {
+        adminAuth.checkAuthStatus();
+    }
+});
+</script>
+
+    <script>
+        // Simulate an admin login for demonstration purposes
+        function handleLogin() {
+            const demoAdmin = {
+                name: 'AdminUser',
+                email: 'admin@smartbus.com',
+                role: 'admin',
+                token: 'demo-token-' + Date.now(),
+                loginTime: new Date().toISOString()
+            };
+
+            // Store authentication data
+            localStorage.setItem('smartbus_admin_token', demoAdmin.token);
+            localStorage.setItem('smartbus_admin_data', JSON.stringify(demoAdmin));
+
+            // Show success notification
+            adminAuth.showNotification('✅ Login successful! Redirecting to admin dashboard...', 'success');
+
+            // Redirect to admin dashboard
+            setTimeout(() => {
+                window.location.href = 'admin-dashboard.html';
+            }, 1500);
+        }
+       
+    </script>
+</body>
+</html>
